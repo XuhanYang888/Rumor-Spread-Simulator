@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rumor Spread Simulator</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar">
+        <h1>Rumor Spread Simulator</h1>
+        <p class="subtitle">SIR / SIS Modeling</p>
+
+        <div class="control-group">
+          <h3>Simulation Controls</h3>
+          <button id="btn-play">Play</button>
+          <button id="btn-pause">Pause</button>
+          <button id="btn-reset">Reset</button>
+        </div>
+
+        <div class="control-group">
+          <h3>Parameters</h3>
+          <label for="spread-rate">Spread Rate (β)</label>
+          <input type="range" id="spread-rate" min="0" max="100" value="30" />
+
+          <label for="forget-rate">Forget Rate (γ)</label>
+          <input type="range" id="forget-rate" min="0" max="100" value="10" />
+        </div>
+      </aside>
+
+      <main class="visuals">
+        <div id="network-container" class="panel">
+          <h2>Friendship Network</h2>
+          <div id="network-canvas"></div>
+        </div>
+
+        <div id="chart-container" class="panel">
+          <h2>Spread Curve</h2>
+          <div id="chart-canvas"></div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
