@@ -3,12 +3,18 @@ import "../src/style.css";
 import { DataSet } from "vis-data";
 import { Network } from "vis-network";
 
+const STATES = {
+  S: { color: "#888888", name: "Unaware" },
+  I: { color: "#d9534f", name: "Excited" },
+  R: { color: "#3498db", name: "Forgotten" },
+};
+
 const nodes = new DataSet([
-  { id: 1, label: "Alice" },
-  { id: 2, label: "Bob" },
-  { id: 3, label: "Charlie" },
-  { id: 4, label: "Diana" },
-  { id: 5, label: "Eric" },
+  { id: 1, label: "Alice", state: "S", color: STATES.S.color },
+  { id: 2, label: "Bob", state: "S", color: STATES.S.color },
+  { id: 3, label: "Charlie", state: "S", color: STATES.S.color },
+  { id: 4, label: "Diana", state: "S", color: STATES.S.color },
+  { id: 5, label: "Eric", state: "S", color: STATES.S.color },
 ]);
 
 const edges = new DataSet([
@@ -65,6 +71,8 @@ const options = {
     initiallyActive: true,
     addNode: function (nodeData, callback) {
       nodeData.label = "Person";
+      nodeData.state = "S";
+      nodeData.color = STATES.S.color;
       callback(nodeData);
     },
   },
@@ -89,7 +97,12 @@ btnGenerate.addEventListener("click", () => {
 
   const newNodes = [];
   for (let i = 1; i <= numNodes; i++) {
-    newNodes.push({ id: i, label: `Person ${i}` });
+    newNodes.push({
+      id: i,
+      label: `Person ${i}`,
+      state: "S",
+      color: STATES.S.color,
+    });
   }
   nodes.add(newNodes);
 
@@ -103,4 +116,21 @@ btnGenerate.addEventListener("click", () => {
     }
   }
   edges.add(newEdges);
+});
+
+network.on("click", function (properties) {
+  const clickedNodeIds = properties.nodes;
+
+  if (clickedNodeIds.length > 0) {
+    const nodeId = clickedNodeIds[0];
+    const node = nodes.get(nodeId);
+
+    if (node.state === "S") {
+      nodes.update({ id: nodeId, state: "I", color: STATES.I.color });
+    } else if (node.state === "I") {
+      nodes.update({ id: nodeId, state: "R", color: STATES.R.color });
+    } else {
+      nodes.update({ id: nodeId, state: "S", color: STATES.S.color });
+    }
+  }
 });
