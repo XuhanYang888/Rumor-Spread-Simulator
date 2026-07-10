@@ -1,3 +1,5 @@
+import "vis-network/styles/vis-network.css";
+import "../src/style.css";
 import { DataSet } from "vis-data";
 import { Network } from "vis-network";
 
@@ -58,6 +60,47 @@ const options = {
       springLength: 95,
     },
   },
+  manipulation: {
+    enabled: true,
+    initiallyActive: true,
+    addNode: function (nodeData, callback) {
+      nodeData.label = "Person";
+      callback(nodeData);
+    },
+  },
 };
 
 const network = new Network(container, data, options);
+const btnClear = document.getElementById("btn-clear");
+const btnGenerate = document.getElementById("btn-generate");
+
+btnClear.addEventListener("click", () => {
+  nodes.clear();
+  edges.clear();
+});
+
+btnGenerate.addEventListener("click", () => {
+  nodes.clear();
+  edges.clear();
+
+  // change to customizable later
+  const numNodes = 25;
+  const connectionProbability = 0.12;
+
+  const newNodes = [];
+  for (let i = 1; i <= numNodes; i++) {
+    newNodes.push({ id: i, label: `Person ${i}` });
+  }
+  nodes.add(newNodes);
+
+  // make sure no disconnected node later
+  const newEdges = [];
+  for (let i = 1; i <= numNodes; i++) {
+    for (let j = i + 1; j <= numNodes; j++) {
+      if (Math.random() < connectionProbability) {
+        newEdges.push({ from: i, to: j });
+      }
+    }
+  }
+  edges.add(newEdges);
+});

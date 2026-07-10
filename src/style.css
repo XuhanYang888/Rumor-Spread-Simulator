@@ -98,3 +98,34 @@ button:hover {
   border-radius: 8px;
   overflow: hidden;
 }
+
+div.vis-network div.vis-manipulation {
+  background: #1a1a20 !important;
+  border-bottom-color: #1a1a20 !important;
+  color: #fff !important;
+  padding-top: 10px;
+}
+
+div.vis-network div.vis-manipulation button.vis-button,
+div.vis-network div.vis-edit-mode button.vis-button {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+  border: 1px solid rgba(26, 26, 26, 0.15) !important;
+  margin-right: 3px;
+}
+
+div.vis-network div.vis-manipulation button.vis-button:hover,
+div.vis-network div.vis-manipulation button.vis-button:active,
+div.vis-network div.vis-edit-mode button.vis-button:hover,
+div.vis-network div.vis-edit-mode button.vis-button:active {
+  background-color: rgba(255, 255, 255, 0.28) !important;
+  box-shadow: none !important;
+}
+
+div.vis-network button.vis-close {
+  display: none !important;
+}
+
+div.vis-network div.vis-manipulation .vis-separator-line {
+  display: none !important;
+}
