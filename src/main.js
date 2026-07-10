@@ -83,11 +83,13 @@ const btnClear = document.getElementById("btn-clear");
 const btnGenerate = document.getElementById("btn-generate");
 
 btnClear.addEventListener("click", () => {
+  btnPause.click();
   nodes.clear();
   edges.clear();
 });
 
 btnGenerate.addEventListener("click", () => {
+  btnPause.click();
   nodes.clear();
   edges.clear();
 
@@ -133,4 +135,50 @@ network.on("click", function (properties) {
       nodes.update({ id: nodeId, state: "S", color: STATES.S.color });
     }
   }
+});
+
+let simulationInterval = null;
+let isPlaying = false;
+const TICK_RATE = 500;
+
+const btnPlay = document.getElementById("btn-play");
+const btnPause = document.getElementById("btn-pause");
+const btnReset = document.getElementById("btn-reset");
+
+function simulationTick() {
+  // finish this
+  console.log("simulation not done yet");
+}
+
+btnPlay.addEventListener("click", () => {
+  if (!isPlaying) {
+    isPlaying = true;
+    simulationInterval = setInterval(simulationTick, TICK_RATE);
+    console.log("Simulation Started.");
+  }
+});
+
+btnPause.addEventListener("click", () => {
+  if (isPlaying) {
+    isPlaying = false;
+    clearInterval(simulationInterval);
+    console.log("Simulation Paused.");
+  }
+});
+
+btnReset.addEventListener("click", () => {
+  isPlaying = false;
+  clearInterval(simulationInterval);
+
+  const allNodes = nodes.get();
+  const resetNodes = allNodes.map((node) => {
+    return {
+      ...node,
+      state: "S",
+      color: STATES.S.color,
+    };
+  });
+
+  nodes.update(resetNodes);
+  console.log("Simulation Reset. Everyone is unaware again.");
 });
