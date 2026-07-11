@@ -27,6 +27,13 @@
 
         <div class="control-group">
           <h3>Parameters</h3>
+
+          <label for="model-type">Model Type</label>
+          <select id="model-type">
+            <option value="SIR">SIR (Turn Blue / Immune)</option>
+            <option value="SIS">SIS (Turn Gray / Susceptible)</option>
+          </select>
+
           <label for="spread-rate">Spread Rate (β)</label>
           <input type="range" id="spread-rate" min="0" max="100" value="30" />
 

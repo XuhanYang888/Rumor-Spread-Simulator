@@ -4,9 +4,9 @@ import { DataSet } from "vis-data";
 import { Network } from "vis-network";
 
 const STATES = {
-  S: { color: "#888888", name: "Unaware" },
-  I: { color: "#d9534f", name: "Excited" },
-  R: { color: "#3498db", name: "Forgotten" },
+  S: { color: "#888888", name: "Susceptible" },
+  I: { color: "#d9534f", name: "Infectious" },
+  R: { color: "#3498db", name: "Recovered" },
 };
 
 const nodes = new DataSet([
@@ -175,7 +175,28 @@ function simulationTick() {
     nodes.update(updates);
   }
 
-  // implement forgeting
+  const forgetSliderValue = document.getElementById("forget-rate").value;
+  const forgetProbability = forgetSliderValue / 100;
+  const modelType = document.getElementById("model-type").value;
+  const nodesToRecover = [];
+
+  infectedNodes.forEach((infectedNode) => {
+    if (Math.random() < forgetProbability) {
+      nodesToRecover.push(infectedNode.id);
+    }
+  });
+
+  const recoveryUpdates = nodesToRecover.map((id) => {
+    if (modelType === "SIR") {
+      return { id: id, state: "R", color: STATES.R.color };
+    } else {
+      return { id: id, state: "S", color: STATES.S.color };
+    }
+  });
+
+  if (recoveryUpdates.length > 0) {
+    nodes.update(recoveryUpdates);
+  }
 }
 
 btnPlay.addEventListener("click", () => {
@@ -208,7 +229,7 @@ btnReset.addEventListener("click", () => {
   });
 
   nodes.update(resetNodes);
-  console.log("Simulation Reset. Everyone is unaware again.");
+  console.log("Simulation Reset. Everyone are susceptible again.");
 });
 
 const spreadSlider = document.getElementById("spread-rate");
@@ -219,3 +240,12 @@ spreadSlider.addEventListener("input", (e) => {
 });
 
 spreadLabel.innerText = `Spread Rate (β): ${spreadSlider.value}%`;
+
+const forgetSlider = document.getElementById("forget-rate");
+const forgetLabel = document.querySelector('label[for="forget-rate"]');
+
+forgetSlider.addEventListener("input", (e) => {
+  forgetLabel.innerText = `Forget Rate (γ): ${e.target.value}%`;
+});
+
+forgetLabel.innerText = `Forget Rate (γ): ${forgetSlider.value}%`;
