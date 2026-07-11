@@ -146,8 +146,36 @@ const btnPause = document.getElementById("btn-pause");
 const btnReset = document.getElementById("btn-reset");
 
 function simulationTick() {
-  // finish this
-  console.log("simulation not done yet");
+  const spreadSliderValue = document.getElementById("spread-rate").value;
+  const spreadProbability = spreadSliderValue / 100;
+  const allNodes = nodes.get();
+  const nodesToInfect = [];
+  const infectedNodes = allNodes.filter((node) => node.state === "I");
+
+  infectedNodes.forEach((infectedNode) => {
+    const connectedNodeIds = network.getConnectedNodes(infectedNode.id);
+
+    connectedNodeIds.forEach((neighborId) => {
+      const neighbor = nodes.get(neighborId);
+      if (neighbor.state === "S") {
+        if (Math.random() < spreadProbability) {
+          if (!nodesToInfect.includes(neighborId)) {
+            nodesToInfect.push(neighborId);
+          }
+        }
+      }
+    });
+  });
+
+  const updates = nodesToInfect.map((id) => {
+    return { id: id, state: "I", color: STATES.I.color };
+  });
+
+  if (updates.length > 0) {
+    nodes.update(updates);
+  }
+
+  // implement forgeting
 }
 
 btnPlay.addEventListener("click", () => {
@@ -182,3 +210,12 @@ btnReset.addEventListener("click", () => {
   nodes.update(resetNodes);
   console.log("Simulation Reset. Everyone is unaware again.");
 });
+
+const spreadSlider = document.getElementById("spread-rate");
+const spreadLabel = document.querySelector('label[for="spread-rate"]');
+
+spreadSlider.addEventListener("input", (e) => {
+  spreadLabel.innerText = `Spread Rate (β): ${e.target.value}%`;
+});
+
+spreadLabel.innerText = `Spread Rate (β): ${spreadSlider.value}%`;
