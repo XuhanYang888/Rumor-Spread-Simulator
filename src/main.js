@@ -1,5 +1,6 @@
 import "vis-network/styles/vis-network.css";
 import "../src/style.css";
+import Chart from "chart.js/auto";
 import { DataSet } from "vis-data";
 import { Network } from "vis-network";
 
@@ -249,3 +250,66 @@ forgetSlider.addEventListener("input", (e) => {
 });
 
 forgetLabel.innerText = `Forget Rate (γ): ${forgetSlider.value}%`;
+
+const ctx = document.getElementById("rumor-chart").getContext("2d");
+
+const chartData = {
+  labels: [],
+  datasets: [
+    {
+      label: STATES.S.name,
+      data: [],
+      borderColor: STATES.S.color,
+      backgroundColor: STATES.S.color,
+      borderWidth: 2,
+      pointRadius: 0,
+      tension: 0.4,
+    },
+    {
+      label: STATES.I.name,
+      data: [],
+      borderColor: STATES.I.color,
+      backgroundColor: STATES.I.color,
+      borderWidth: 2,
+      pointRadius: 0,
+      tension: 0.4,
+    },
+    {
+      label: STATES.R.name,
+      data: [],
+      borderColor: STATES.R.color,
+      backgroundColor: STATES.R.color,
+      borderWidth: 2,
+      pointRadius: 0,
+      tension: 0.4,
+    },
+  ],
+};
+
+const rumorChart = new Chart(ctx, {
+  type: "line",
+  data: chartData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    scales: {
+      x: {
+        title: { display: true, text: "Time (Ticks)", color: "#888" },
+        ticks: { color: "#888" },
+        grid: { color: "#333" },
+      },
+      y: {
+        title: { display: true, text: "Population", color: "#888" },
+        ticks: { color: "#888" },
+        grid: { color: "#333" },
+        beginAtZero: true,
+      },
+    },
+    plugins: {
+      legend: {
+        labels: { color: "#fff" },
+      },
+    },
+  },
+});
