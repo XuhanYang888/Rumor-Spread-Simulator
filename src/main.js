@@ -136,10 +136,32 @@ network.on("click", function (properties) {
       nodes.update({ id: nodeId, state: "S", color: STATES.S.color });
     }
   }
+
+  if (currentTick === 0) {
+    rumorChart.data.labels = [];
+    rumorChart.data.datasets.forEach((dataset) => (dataset.data = []));
+
+    let startS = 0,
+      startI = 0,
+      startR = 0;
+    nodes.get().forEach((n) => {
+      if (n.state === "S") startS++;
+      else if (n.state === "I") startI++;
+      else if (n.state === "R") startR++;
+    });
+
+    rumorChart.data.labels.push(0);
+    rumorChart.data.datasets[0].data.push(startS);
+    rumorChart.data.datasets[1].data.push(startI);
+    rumorChart.data.datasets[2].data.push(startR);
+    rumorChart.update();
+    currentTick = 1;
+  }
 });
 
 let simulationInterval = null;
 let isPlaying = false;
+let currentTick = 0;
 const TICK_RATE = 500;
 
 const btnPlay = document.getElementById("btn-play");
@@ -198,6 +220,25 @@ function simulationTick() {
   if (recoveryUpdates.length > 0) {
     nodes.update(recoveryUpdates);
   }
+
+  let countS = 0;
+  let countI = 0;
+  let countR = 0;
+
+  const currentNodes = nodes.get();
+  currentNodes.forEach((node) => {
+    if (node.state === "S") countS++;
+    else if (node.state === "I") countI++;
+    else if (node.state === "R") countR++;
+  });
+
+  rumorChart.data.labels.push(currentTick);
+  rumorChart.data.datasets[0].data.push(countS);
+  rumorChart.data.datasets[1].data.push(countI);
+  rumorChart.data.datasets[2].data.push(countR);
+
+  rumorChart.update();
+  currentTick++;
 }
 
 btnPlay.addEventListener("click", () => {
