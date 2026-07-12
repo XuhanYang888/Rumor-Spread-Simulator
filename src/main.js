@@ -87,6 +87,7 @@ btnClear.addEventListener("click", () => {
   btnPause.click();
   nodes.clear();
   edges.clear();
+  resetChartData();
 });
 
 btnGenerate.addEventListener("click", () => {
@@ -119,6 +120,8 @@ btnGenerate.addEventListener("click", () => {
     }
   }
   edges.add(newEdges);
+
+  resetChartData();
 });
 
 network.on("click", function (properties) {
@@ -241,6 +244,19 @@ function simulationTick() {
   currentTick++;
 }
 
+function resetChartData() {
+  currentTick = 0;
+
+  rumorChart.data.labels = [];
+  rumorChart.data.datasets.forEach((dataset) => {
+    dataset.data = [];
+  });
+
+  const totalPeople = nodes.length;
+  rumorChart.options.scales.y.max = totalPeople > 0 ? totalPeople : 10;
+  rumorChart.update();
+}
+
 btnPlay.addEventListener("click", () => {
   if (!isPlaying) {
     isPlaying = true;
@@ -272,6 +288,7 @@ btnReset.addEventListener("click", () => {
 
   nodes.update(resetNodes);
   console.log("Simulation Reset. Everyone are susceptible again.");
+  resetChartData();
 });
 
 const spreadSlider = document.getElementById("spread-rate");
