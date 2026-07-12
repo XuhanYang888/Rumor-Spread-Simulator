@@ -1,6 +1,6 @@
 import "vis-network/styles/vis-network.css";
 import "../src/style.css";
-import Chart from "chart.js/auto";
+import Chart, { RadialLinearScale } from "chart.js/auto";
 import { DataSet } from "vis-data";
 import { Network } from "vis-network";
 
@@ -165,7 +165,7 @@ network.on("click", function (properties) {
 let simulationInterval = null;
 let isPlaying = false;
 let currentTick = 0;
-const TICK_RATE = 500;
+let TICK_RATE = 500;
 
 const btnPlay = document.getElementById("btn-play");
 const btnPause = document.getElementById("btn-pause");
@@ -309,6 +309,22 @@ forgetSlider.addEventListener("input", (e) => {
 
 forgetLabel.innerText = `Forget Rate (γ): ${forgetSlider.value}%`;
 
+const speedSlider = document.getElementById("sim-speed");
+const speedLabel = document.querySelector('label[for="sim-speed"]');
+
+speedSlider.addEventListener("input", (e) => {
+  const speedValue = parseInt(e.target.value);
+
+  TICK_RATE = 1100 - speedValue * 100;
+
+  speedLabel.innerText = `Simulation Speed: ${speedValue}x`;
+
+  if (isPlaying) {
+    clearInterval(simulationInterval);
+    simulationInterval = setInterval(simulationTick, TICK_RATE);
+  }
+});
+
 const ctx = document.getElementById("rumor-chart").getContext("2d");
 
 const chartData = {
@@ -350,6 +366,7 @@ const rumorChart = new Chart(ctx, {
   options: {
     responsive: true,
     maintainAspectRatio: false,
+    animations: false,
     animation: false,
     scales: {
       x: {
