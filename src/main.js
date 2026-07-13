@@ -3,6 +3,7 @@ import "../src/style.css";
 import Chart, { RadialLinearScale } from "chart.js/auto";
 import { DataSet } from "vis-data";
 import { Network } from "vis-network";
+import { _capitalize } from "chart.js/helpers";
 
 const STATES = {
   S: { color: "#888888", name: "Susceptible" },
@@ -62,7 +63,8 @@ const options = {
   },
   physics: {
     barnesHut: {
-      gravitationalConstant: -2000,
+      gravitationalConstant: -3000,
+      centralGravity: 0.1,
       springConstant: 0.04,
       springLength: 95,
     },
@@ -82,6 +84,7 @@ const options = {
 const network = new Network(container, data, options);
 const btnClear = document.getElementById("btn-clear");
 const btnGenerate = document.getElementById("btn-generate");
+const btnGenerateHub = document.getElementById("btn-generate-hub");
 
 btnClear.addEventListener("click", () => {
   btnPause.click();
@@ -121,6 +124,53 @@ btnGenerate.addEventListener("click", () => {
   }
   edges.add(newEdges);
 
+  resetChartData();
+});
+
+btnGenerateHub.addEventListener("click", () => {
+  btnPause.click();
+  nodes.clear();
+  edges.clear();
+
+  const numNodes = 25;
+  const newNodes = [];
+  const newEdges = [];
+
+  for (let i = 1; i <= numNodes; i++) {
+    newNodes.push({
+      id: i,
+      label: `Person ${i}`,
+      state: "S",
+      color: STATES.S.color,
+    });
+  }
+  nodes.add(newNodes);
+
+  const hat = [];
+
+  newEdges.push({ from: 1, to: 2 });
+  hat.push(1, 2);
+
+  for (let i = 3; i <= numNodes; i++) {
+    const connectionsToMake = 2;
+    const friendsChosen = new Set();
+
+    while (friendsChosen.size < connectionsToMake) {
+      const randomIndex = Math.floor(Math.random() * hat.length);
+      const chosenFriend = hat[randomIndex];
+
+      if (chosenFriend !== i) {
+        friendsChosen.add(chosenFriend);
+      }
+    }
+
+    friendsChosen.forEach((friend) => {
+      newEdges.push({ from: i, to: friend });
+      hat.push(i, friend);
+    });
+  }
+
+  edges.add(newEdges);
   resetChartData();
 });
 
