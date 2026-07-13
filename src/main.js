@@ -34,6 +34,7 @@ const data = {
 };
 
 const options = {
+  interaction: { hover: true },
   nodes: {
     shape: "dot",
     size: 20,
@@ -210,6 +211,14 @@ network.on("click", function (properties) {
     rumorChart.update();
     currentTick = 1;
   }
+});
+
+network.on("hoverNode", function () {
+  network.canvas.body.container.style.cursor = "pointer";
+});
+
+network.on("blurNode", function () {
+  network.canvas.body.container.style.cursor = "default";
 });
 
 let simulationInterval = null;
@@ -437,4 +446,22 @@ const rumorChart = new Chart(ctx, {
       },
     },
   },
+});
+
+const btnInfo = document.getElementById("btn-info");
+const infoModal = document.getElementById("info-modal");
+const closeModal = document.getElementById("close-modal");
+
+btnInfo.addEventListener("click", () => {
+  infoModal.classList.remove("hidden");
+});
+
+closeModal.addEventListener("click", () => {
+  infoModal.classList.add("hidden");
+});
+
+window.addEventListener("click", (e) => {
+  if (e.target === infoModal) {
+    infoModal.classList.add("hidden");
+  }
 });
