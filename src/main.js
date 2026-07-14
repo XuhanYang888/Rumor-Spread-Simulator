@@ -34,7 +34,6 @@ const data = {
 };
 
 const options = {
-  interaction: { hover: true },
   nodes: {
     shape: "dot",
     size: 20,
@@ -59,6 +58,7 @@ const options = {
     },
   },
   interaction: {
+    hover: true,
     zoomView: true,
     zoomSpeed: 0.67,
   },
@@ -66,8 +66,9 @@ const options = {
     barnesHut: {
       gravitationalConstant: -3000,
       centralGravity: 0.1,
-      springConstant: 0.04,
-      springLength: 95,
+      springConstant: 0.03,
+      springLength: 100,
+      damping: 0.15,
     },
   },
   manipulation: {
@@ -86,6 +87,12 @@ const network = new Network(container, data, options);
 const btnClear = document.getElementById("btn-clear");
 const btnGenerate = document.getElementById("btn-generate");
 const btnGenerateHub = document.getElementById("btn-generate-hub");
+const nodeSlider = document.getElementById("node-count");
+const nodeLabel = document.querySelector('label[for="node-count"]');
+
+nodeSlider.addEventListener("input", (e) => {
+  nodeLabel.innerText = `Total People: ${e.target.value}`;
+});
 
 btnClear.addEventListener("click", () => {
   btnPause.click();
@@ -99,9 +106,8 @@ btnGenerate.addEventListener("click", () => {
   nodes.clear();
   edges.clear();
 
-  // change to customizable later
-  const numNodes = 25;
-  const connectionProbability = 0.12;
+  const numNodes = parseInt(document.getElementById("node-count").value);
+  const connectionProbability = 2.5 / numNodes;
 
   const newNodes = [];
   for (let i = 1; i <= numNodes; i++) {
@@ -114,11 +120,21 @@ btnGenerate.addEventListener("click", () => {
   }
   nodes.add(newNodes);
 
-  // make sure no disconnected node later
   const newEdges = [];
+  const addedEdges = new Set();
+
+  for (let i = 2; i <= numNodes; i++) {
+    const randomPreviousNode = Math.floor(Math.random() * (i - 1)) + 1;
+    newEdges.push({ from: i, to: randomPreviousNode });
+    addedEdges.add(`${randomPreviousNode}-${i}`);
+  }
+
   for (let i = 1; i <= numNodes; i++) {
     for (let j = i + 1; j <= numNodes; j++) {
-      if (Math.random() < connectionProbability) {
+      if (
+        !addedEdges.has(`${i}-${j}`) &&
+        Math.random() < connectionProbability
+      ) {
         newEdges.push({ from: i, to: j });
       }
     }
@@ -133,7 +149,7 @@ btnGenerateHub.addEventListener("click", () => {
   nodes.clear();
   edges.clear();
 
-  const numNodes = 25;
+  const numNodes = parseInt(document.getElementById("node-count").value);
   const newNodes = [];
   const newEdges = [];
 
@@ -153,7 +169,7 @@ btnGenerateHub.addEventListener("click", () => {
   hat.push(1, 2);
 
   for (let i = 3; i <= numNodes; i++) {
-    const connectionsToMake = 2;
+    const connectionsToMake = numNodes < 15 ? 1 : 2;
     const friendsChosen = new Set();
 
     while (friendsChosen.size < connectionsToMake) {
