@@ -11,24 +11,12 @@
       <aside class="sidebar">
         <h1>Rumor Spread Simulator</h1>
         <p class="subtitle">SIR / SIS Modeling</p>
-        <button
-          id="btn-info"
-          style="background-color: #3498db; margin-bottom: 20px"
-        >
-          How it works
-        </button>
+        <button id="btn-info">How it works</button>
 
         <div class="control-group">
           <h3>Network Controls</h3>
           <label for="node-count">Total People: 25</label>
-          <input
-            type="range"
-            id="node-count"
-            min="10"
-            max="100"
-            value="25"
-            style="margin-bottom: 15px"
-          />
+          <input type="range" id="node-count" min="10" max="100" value="25" />
 
           <button id="btn-generate">Random Graph</button>
           <button id="btn-generate-hub">Influencer Graph</button>
@@ -37,8 +25,8 @@
 
         <div class="control-group">
           <h3>Simulation Controls</h3>
-          <button id="btn-play">Play</button>
-          <button id="btn-pause">Pause</button>
+          <button id="btn-play-pause" class="btn-play-pause">▶ Play</button>
+          <button id="btn-random-outbreak">Seed Random Outbreak</button>
           <button id="btn-reset">Reset</button>
         </div>
 
@@ -65,12 +53,40 @@
       <main class="visuals">
         <div id="network-container" class="panel">
           <h2>Friendship Network</h2>
+          <div class="legend-strip">
+            <span class="legend-item">
+              <span class="legend-dot legend-dot--susceptible"></span>
+              Susceptible
+            </span>
+            <span class="legend-item">
+              <span class="legend-dot legend-dot--infected"></span>
+              Infected
+            </span>
+            <span class="legend-item">
+              <span class="legend-dot legend-dot--recovered"></span>
+              Recovered
+            </span>
+          </div>
           <div id="network-canvas"></div>
         </div>
 
         <div id="chart-container" class="panel">
           <h2>Spread Curve</h2>
-          <div id="chart-canvas" style="position: relative">
+          <div id="stats-bar">
+            <div class="stat-item stat-item--susceptible">
+              <span class="stat-label">Susceptible</span>
+              <span class="stat-value" id="stat-s">0</span>
+            </div>
+            <div class="stat-item stat-item--infected">
+              <span class="stat-label">Infected</span>
+              <span class="stat-value" id="stat-i">0</span>
+            </div>
+            <div class="stat-item stat-item--recovered">
+              <span class="stat-label">Recovered</span>
+              <span class="stat-value" id="stat-r">0</span>
+            </div>
+          </div>
+          <div id="chart-canvas">
             <canvas id="rumor-chart"></canvas>
           </div>
         </div>
@@ -84,16 +100,22 @@
 
         <ul>
           <li>
-            <strong style="color: #888">Gray (Susceptible):</strong> Hasn't
-            heard the rumor yet.
+            <strong class="legend-text legend-text--susceptible"
+              >Gray (Susceptible):</strong
+            >
+            Hasn't heard the rumor yet.
           </li>
           <li>
-            <strong style="color: #e74c3c">Red (Infected):</strong> Actively
-            spreading the rumor.
+            <strong class="legend-text legend-text--infected"
+              >Red (Infected):</strong
+            >
+            Actively spreading the rumor.
           </li>
           <li>
-            <strong style="color: #3498db">Blue (Recovered):</strong> Bored of
-            the rumor and stopped spreading it.
+            <strong class="legend-text legend-text--recovered"
+              >Blue (Recovered):</strong
+            >
+            Bored of the rumor and stopped spreading it.
           </li>
         </ul>
 

@@ -1,3 +1,9 @@
+:root {
+  --color-susceptible: #888888;
+  --color-infected: #d9534f;
+  --color-recovered: #3498db;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -52,6 +58,10 @@ select {
   border-radius: 4px;
 }
 
+#node-count {
+  margin-bottom: 15px;
+}
+
 button {
   padding: 10px;
   background-color: #4caf50;
@@ -65,11 +75,30 @@ button {
 button:hover {
   background-color: #45a049;
 }
-#btn-pause {
+
+#btn-info {
+  background-color: var(--color-recovered);
+  margin-bottom: 20px;
+}
+
+#btn-reset {
+  background-color: var(--color-infected);
+}
+
+#btn-random-outbreak {
+  background-color: #9b59b6;
+}
+
+#btn-random-outbreak:hover {
+  background-color: #8e44ad;
+}
+
+.btn-play-pause.is-playing {
   background-color: #f0ad4e;
 }
-#btn-reset {
-  background-color: #d9534f;
+
+.btn-play-pause.is-playing:hover {
+  background-color: #ec971f;
 }
 
 .visuals {
@@ -97,6 +126,93 @@ button:hover {
   flex: 2;
 }
 
+.legend-strip {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot--susceptible {
+  background-color: var(--color-susceptible);
+}
+
+.legend-dot--infected {
+  background-color: var(--color-infected);
+}
+
+.legend-dot--recovered {
+  background-color: var(--color-recovered);
+}
+
+.legend-text--susceptible {
+  color: var(--color-susceptible);
+}
+
+.legend-text--infected {
+  color: var(--color-infected);
+}
+
+.legend-text--recovered {
+  color: var(--color-recovered);
+}
+
+#stats-bar {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.stat-item {
+  flex: 1;
+  background-color: #1a1a20;
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 4px solid transparent;
+}
+
+.stat-item--susceptible {
+  border-left-color: var(--color-susceptible);
+}
+
+.stat-item--infected {
+  border-left-color: var(--color-infected);
+}
+
+.stat-item--recovered {
+  border-left-color: var(--color-recovered);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
 #network-canvas,
 #chart-canvas {
   flex: 1;
@@ -106,6 +222,14 @@ button:hover {
   background-color: #1a1a20;
   border-radius: 8px;
   overflow: hidden;
+}
+
+#chart-canvas {
+  position: relative;
+}
+
+#network-canvas.node-hover {
+  cursor: pointer;
 }
 
 div.vis-network div.vis-manipulation {

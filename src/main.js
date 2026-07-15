@@ -1,31 +1,27 @@
 import "vis-network/styles/vis-network.css";
 import "../src/style.css";
-import Chart, { RadialLinearScale } from "chart.js/auto";
+import Chart from "chart.js/auto";
 import { DataSet } from "vis-data";
 import { Network } from "vis-network";
-import { _capitalize } from "chart.js/helpers";
 
+const rootStyles = getComputedStyle(document.documentElement);
 const STATES = {
-  S: { color: "#888888", name: "Susceptible" },
-  I: { color: "#d9534f", name: "Infectious" },
-  R: { color: "#3498db", name: "Recovered" },
+  S: {
+    color: rootStyles.getPropertyValue("--color-susceptible").trim(),
+    name: "Susceptible",
+  },
+  I: {
+    color: rootStyles.getPropertyValue("--color-infected").trim(),
+    name: "Infectious",
+  },
+  R: {
+    color: rootStyles.getPropertyValue("--color-recovered").trim(),
+    name: "Recovered",
+  },
 };
 
-const nodes = new DataSet([
-  { id: 1, label: "Alice", state: "S", color: STATES.S.color },
-  { id: 2, label: "Bob", state: "S", color: STATES.S.color },
-  { id: 3, label: "Charlie", state: "S", color: STATES.S.color },
-  { id: 4, label: "Diana", state: "S", color: STATES.S.color },
-  { id: 5, label: "Eric", state: "S", color: STATES.S.color },
-]);
-
-const edges = new DataSet([
-  { from: 1, to: 2 },
-  { from: 1, to: 3 },
-  { from: 2, to: 4 },
-  { from: 2, to: 5 },
-  { from: 4, to: 5 },
-]);
+const nodes = new DataSet([]);
+const edges = new DataSet([]);
 
 const container = document.getElementById("network-canvas");
 const data = {
@@ -84,30 +80,77 @@ const options = {
 };
 
 const network = new Network(container, data, options);
+
 const btnClear = document.getElementById("btn-clear");
 const btnGenerate = document.getElementById("btn-generate");
 const btnGenerateHub = document.getElementById("btn-generate-hub");
 const nodeSlider = document.getElementById("node-count");
 const nodeLabel = document.querySelector('label[for="node-count"]');
 
+const btnPlayPause = document.getElementById("btn-play-pause");
+const btnRandomOutbreak = document.getElementById("btn-random-outbreak");
+const btnReset = document.getElementById("btn-reset");
+
+const spreadSlider = document.getElementById("spread-rate");
+const spreadLabel = document.querySelector('label[for="spread-rate"]');
+const forgetSlider = document.getElementById("forget-rate");
+const forgetLabel = document.querySelector('label[for="forget-rate"]');
+const speedSlider = document.getElementById("sim-speed");
+const speedLabel = document.querySelector('label[for="sim-speed"]');
+
+const statS = document.getElementById("stat-s");
+const statI = document.getElementById("stat-i");
+const statR = document.getElementById("stat-r");
+
+let simulationInterval = null;
+let isPlaying = false;
+let hasStarted = false;
+let currentTick = 0;
+let TICK_RATE = 500;
+let lastGraphType = "random";
+
 nodeSlider.addEventListener("input", (e) => {
   nodeLabel.innerText = `Total People: ${e.target.value}`;
 });
 
-btnClear.addEventListener("click", () => {
-  btnPause.click();
-  nodes.clear();
-  edges.clear();
-  resetChartData();
+nodeSlider.addEventListener("change", (e) => {
+  const numNodes = parseInt(e.target.value);
+  if (lastGraphType === "hub") {
+    generateHubGraph(numNodes);
+  } else {
+    generateRandomGraph(numNodes);
+  }
+  resetSimulationState();
 });
 
-btnGenerate.addEventListener("click", () => {
-  btnPause.click();
+function countStates() {
+  const counts = { S: 0, I: 0, R: 0 };
+  nodes.get().forEach((n) => counts[n.state]++);
+  return counts;
+}
+
+function updateStatsDisplay(counts) {
+  statS.textContent = counts.S;
+  statI.textContent = counts.I;
+  statR.textContent = counts.R;
+}
+
+function syncStatsAndChart() {
+  const counts = countStates();
+  updateStatsDisplay(counts);
+
+  if (!hasStarted) {
+    rumorChart.data.labels[0] = 0;
+    rumorChart.data.datasets[0].data[0] = counts.S;
+    rumorChart.data.datasets[1].data[0] = counts.I;
+    rumorChart.data.datasets[2].data[0] = counts.R;
+    rumorChart.update();
+  }
+}
+
+function generateRandomGraph(numNodes) {
   nodes.clear();
   edges.clear();
-
-  const numNodes = parseInt(document.getElementById("node-count").value);
-  const connectionProbability = 2.5 / numNodes;
 
   const newNodes = [];
   for (let i = 1; i <= numNodes; i++) {
@@ -122,6 +165,7 @@ btnGenerate.addEventListener("click", () => {
 
   const newEdges = [];
   const addedEdges = new Set();
+  const connectionProbability = 2.5 / numNodes;
 
   for (let i = 2; i <= numNodes; i++) {
     const randomPreviousNode = Math.floor(Math.random() * (i - 1)) + 1;
@@ -141,18 +185,14 @@ btnGenerate.addEventListener("click", () => {
   }
   edges.add(newEdges);
 
-  resetChartData();
-});
+  lastGraphType = "random";
+}
 
-btnGenerateHub.addEventListener("click", () => {
-  btnPause.click();
+function generateHubGraph(numNodes) {
   nodes.clear();
   edges.clear();
 
-  const numNodes = parseInt(document.getElementById("node-count").value);
   const newNodes = [];
-  const newEdges = [];
-
   for (let i = 1; i <= numNodes; i++) {
     newNodes.push({
       id: i,
@@ -163,6 +203,7 @@ btnGenerateHub.addEventListener("click", () => {
   }
   nodes.add(newNodes);
 
+  const newEdges = [];
   const hat = [];
 
   newEdges.push({ from: 1, to: 2 });
@@ -188,7 +229,42 @@ btnGenerateHub.addEventListener("click", () => {
   }
 
   edges.add(newEdges);
-  resetChartData();
+
+  lastGraphType = "hub";
+}
+
+function resetSimulationState() {
+  pauseSimulation();
+  currentTick = 0;
+  hasStarted = false;
+
+  rumorChart.data.labels = [];
+  rumorChart.data.datasets.forEach((dataset) => {
+    dataset.data = [];
+  });
+
+  const totalPeople = nodes.length;
+  rumorChart.options.scales.y.max = totalPeople > 0 ? totalPeople : 10;
+
+  syncStatsAndChart();
+}
+
+btnClear.addEventListener("click", () => {
+  nodes.clear();
+  edges.clear();
+  resetSimulationState();
+});
+
+btnGenerate.addEventListener("click", () => {
+  const numNodes = parseInt(nodeSlider.value);
+  generateRandomGraph(numNodes);
+  resetSimulationState();
+});
+
+btnGenerateHub.addEventListener("click", () => {
+  const numNodes = parseInt(nodeSlider.value);
+  generateHubGraph(numNodes);
+  resetSimulationState();
 });
 
 network.on("click", function (properties) {
@@ -205,153 +281,117 @@ network.on("click", function (properties) {
     } else {
       nodes.update({ id: nodeId, state: "S", color: STATES.S.color });
     }
-  }
 
-  if (currentTick === 0) {
-    rumorChart.data.labels = [];
-    rumorChart.data.datasets.forEach((dataset) => (dataset.data = []));
-
-    let startS = 0,
-      startI = 0,
-      startR = 0;
-    nodes.get().forEach((n) => {
-      if (n.state === "S") startS++;
-      else if (n.state === "I") startI++;
-      else if (n.state === "R") startR++;
-    });
-
-    rumorChart.data.labels.push(0);
-    rumorChart.data.datasets[0].data.push(startS);
-    rumorChart.data.datasets[1].data.push(startI);
-    rumorChart.data.datasets[2].data.push(startR);
-    rumorChart.update();
-    currentTick = 1;
+    syncStatsAndChart();
   }
 });
 
 network.on("hoverNode", function () {
-  network.canvas.body.container.style.cursor = "pointer";
+  container.classList.add("node-hover");
 });
 
 network.on("blurNode", function () {
-  network.canvas.body.container.style.cursor = "default";
+  container.classList.remove("node-hover");
 });
 
-let simulationInterval = null;
-let isPlaying = false;
-let currentTick = 0;
-let TICK_RATE = 500;
-
-const btnPlay = document.getElementById("btn-play");
-const btnPause = document.getElementById("btn-pause");
-const btnReset = document.getElementById("btn-reset");
-
 function simulationTick() {
-  const spreadSliderValue = document.getElementById("spread-rate").value;
-  const spreadProbability = spreadSliderValue / 100;
-  const allNodes = nodes.get();
-  const nodesToInfect = [];
-  const infectedNodes = allNodes.filter((node) => node.state === "I");
+  const spreadProbability = document.getElementById("spread-rate").value / 100;
+  const infectedNodes = nodes.get({ filter: (n) => n.state === "I" });
+  const nodesToInfect = new Set();
 
   infectedNodes.forEach((infectedNode) => {
     const connectedNodeIds = network.getConnectedNodes(infectedNode.id);
 
     connectedNodeIds.forEach((neighborId) => {
       const neighbor = nodes.get(neighborId);
-      if (neighbor.state === "S") {
-        if (Math.random() < spreadProbability) {
-          if (!nodesToInfect.includes(neighborId)) {
-            nodesToInfect.push(neighborId);
-          }
-        }
+      if (neighbor.state === "S" && Math.random() < spreadProbability) {
+        nodesToInfect.add(neighborId);
       }
     });
   });
 
-  const updates = nodesToInfect.map((id) => {
-    return { id: id, state: "I", color: STATES.I.color };
-  });
-
-  if (updates.length > 0) {
-    nodes.update(updates);
+  if (nodesToInfect.size > 0) {
+    nodes.update(
+      [...nodesToInfect].map((id) => ({
+        id,
+        state: "I",
+        color: STATES.I.color,
+      })),
+    );
   }
 
-  const forgetSliderValue = document.getElementById("forget-rate").value;
-  const forgetProbability = forgetSliderValue / 100;
+  const forgetProbability = document.getElementById("forget-rate").value / 100;
   const modelType = document.getElementById("model-type").value;
-  const nodesToRecover = [];
+  const nodesToRecover = infectedNodes.filter(
+    () => Math.random() < forgetProbability,
+  );
 
-  infectedNodes.forEach((infectedNode) => {
-    if (Math.random() < forgetProbability) {
-      nodesToRecover.push(infectedNode.id);
-    }
-  });
-
-  const recoveryUpdates = nodesToRecover.map((id) => {
-    if (modelType === "SIR") {
-      return { id: id, state: "R", color: STATES.R.color };
-    } else {
-      return { id: id, state: "S", color: STATES.S.color };
-    }
-  });
-
-  if (recoveryUpdates.length > 0) {
+  if (nodesToRecover.length > 0) {
+    const recoveryUpdates = nodesToRecover.map((n) => {
+      return modelType === "SIR"
+        ? { id: n.id, state: "R", color: STATES.R.color }
+        : { id: n.id, state: "S", color: STATES.S.color };
+    });
     nodes.update(recoveryUpdates);
   }
 
-  let countS = 0;
-  let countI = 0;
-  let countR = 0;
-
-  const currentNodes = nodes.get();
-  currentNodes.forEach((node) => {
-    if (node.state === "S") countS++;
-    else if (node.state === "I") countI++;
-    else if (node.state === "R") countR++;
-  });
+  const counts = countStates();
+  updateStatsDisplay(counts);
 
   rumorChart.data.labels.push(currentTick);
-  rumorChart.data.datasets[0].data.push(countS);
-  rumorChart.data.datasets[1].data.push(countI);
-  rumorChart.data.datasets[2].data.push(countR);
-
+  rumorChart.data.datasets[0].data.push(counts.S);
+  rumorChart.data.datasets[1].data.push(counts.I);
+  rumorChart.data.datasets[2].data.push(counts.R);
   rumorChart.update();
+
   currentTick++;
 }
 
-function resetChartData() {
-  currentTick = 0;
+function startSimulation() {
+  if (isPlaying) return;
 
-  rumorChart.data.labels = [];
-  rumorChart.data.datasets.forEach((dataset) => {
-    dataset.data = [];
-  });
+  if (currentTick === 0) {
+    currentTick = 1;
+  }
+  hasStarted = true;
 
-  const totalPeople = nodes.length;
-  rumorChart.options.scales.y.max = totalPeople > 0 ? totalPeople : 10;
-  rumorChart.update();
+  isPlaying = true;
+  simulationInterval = setInterval(simulationTick, TICK_RATE);
+  btnPlayPause.textContent = "⏸ Pause";
+  btnPlayPause.classList.add("is-playing");
+  console.log("Simulation Started.");
 }
 
-btnPlay.addEventListener("click", () => {
-  if (!isPlaying) {
-    isPlaying = true;
-    simulationInterval = setInterval(simulationTick, TICK_RATE);
-    console.log("Simulation Started.");
+function pauseSimulation() {
+  if (!isPlaying) return;
+
+  isPlaying = false;
+  clearInterval(simulationInterval);
+  btnPlayPause.textContent = "▶ Play";
+  btnPlayPause.classList.remove("is-playing");
+  console.log("Simulation Paused.");
+}
+
+btnPlayPause.addEventListener("click", () => {
+  if (isPlaying) {
+    pauseSimulation();
+  } else {
+    startSimulation();
   }
 });
 
-btnPause.addEventListener("click", () => {
-  if (isPlaying) {
-    isPlaying = false;
-    clearInterval(simulationInterval);
-    console.log("Simulation Paused.");
-  }
+btnRandomOutbreak.addEventListener("click", () => {
+  const susceptibleNodes = nodes.get({ filter: (n) => n.state === "S" });
+  if (susceptibleNodes.length === 0) return;
+
+  const randomNode =
+    susceptibleNodes[Math.floor(Math.random() * susceptibleNodes.length)];
+  nodes.update({ id: randomNode.id, state: "I", color: STATES.I.color });
+
+  syncStatsAndChart();
 });
 
 btnReset.addEventListener("click", () => {
-  isPlaying = false;
-  clearInterval(simulationInterval);
-
   const allNodes = nodes.get();
   const resetNodes = allNodes.map((node) => {
     return {
@@ -362,30 +402,19 @@ btnReset.addEventListener("click", () => {
   });
 
   nodes.update(resetNodes);
-  console.log("Simulation Reset. Everyone are susceptible again.");
-  resetChartData();
+  console.log("Simulation Reset. Everyone is susceptible again.");
+  resetSimulationState();
 });
-
-const spreadSlider = document.getElementById("spread-rate");
-const spreadLabel = document.querySelector('label[for="spread-rate"]');
 
 spreadSlider.addEventListener("input", (e) => {
   spreadLabel.innerText = `Spread Rate (β): ${e.target.value}%`;
 });
-
 spreadLabel.innerText = `Spread Rate (β): ${spreadSlider.value}%`;
-
-const forgetSlider = document.getElementById("forget-rate");
-const forgetLabel = document.querySelector('label[for="forget-rate"]');
 
 forgetSlider.addEventListener("input", (e) => {
   forgetLabel.innerText = `Forget Rate (γ): ${e.target.value}%`;
 });
-
 forgetLabel.innerText = `Forget Rate (γ): ${forgetSlider.value}%`;
-
-const speedSlider = document.getElementById("sim-speed");
-const speedLabel = document.querySelector('label[for="sim-speed"]');
 
 speedSlider.addEventListener("input", (e) => {
   const speedValue = parseInt(e.target.value);
@@ -441,7 +470,6 @@ const rumorChart = new Chart(ctx, {
   options: {
     responsive: true,
     maintainAspectRatio: false,
-    animations: false,
     animation: false,
     scales: {
       x: {
@@ -481,3 +509,6 @@ window.addEventListener("click", (e) => {
     infoModal.classList.add("hidden");
   }
 });
+
+generateRandomGraph(25);
+resetSimulationState();
