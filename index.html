@@ -10,79 +10,80 @@
     <div id="app">
       <aside class="sidebar">
         <h1>Rumor Spread Simulator</h1>
-        <p class="subtitle">SIR / SIS Modeling</p>
-        <button id="btn-info">How it works</button>
+        <button id="btn-info">What are the rules?</button>
 
         <div class="control-group">
-          <h3>Network Controls</h3>
-          <label for="node-count">Total People: 25</label>
+          <h3>The Social Circle</h3>
+          <label for="node-count">Total Friends: 25</label>
           <input type="range" id="node-count" min="10" max="100" value="25" />
 
-          <button id="btn-generate">Random Graph</button>
-          <button id="btn-generate-hub">Influencer Graph</button>
+          <button id="btn-generate">Random Friend Group</button>
+          <button id="btn-generate-hub">Influencer Network</button>
           <button id="btn-clear">Clear Graph</button>
         </div>
 
         <div class="control-group">
-          <h3>Simulation Controls</h3>
+          <h3>Drama Controls</h3>
           <button id="btn-play-pause" class="btn-play-pause">▶ Play</button>
-          <button id="btn-random-outbreak">Seed Random Outbreak</button>
-          <button id="btn-reset">Reset</button>
+          <button id="btn-random-outbreak">Start a Random Rumor</button>
+          <button id="btn-reset">Reset (Everyone Forgets)</button>
         </div>
 
         <div class="control-group">
-          <h3>Parameters</h3>
+          <h3>Gossip Settings</h3>
 
-          <label for="model-type">Model Type</label>
+          <label for="model-type">When they get bored...</label>
           <select id="model-type">
-            <option value="SIR">SIR (Turn Blue / Immune)</option>
-            <option value="SIS">SIS (Turn Gray / Susceptible)</option>
+            <option value="SIR">Moved On (Turn Blue & Ignore it)</option>
+            <option value="SIS">
+              Goldfish Memory (Turn Gray & Hear it again)
+            </option>
           </select>
 
-          <label for="spread-rate">Spread Rate (β)</label>
+          <label for="spread-rate">Juiciness (Spread Rate)</label>
           <input type="range" id="spread-rate" min="0" max="100" value="30" />
 
-          <label for="forget-rate">Forget Rate (γ)</label>
+          <label for="forget-rate">Attention Span (Forget Rate)</label>
           <input type="range" id="forget-rate" min="0" max="100" value="10" />
 
-          <label for="sim-speed">Simulation Speed: 5x</label>
+          <label for="sim-speed">Gossip Speed: 5x</label>
           <input type="range" id="sim-speed" min="1" max="10" value="5" />
         </div>
       </aside>
 
       <main class="visuals">
         <div id="network-container" class="panel">
-          <h2>Friendship Network</h2>
+          <h2>The Friend Group</h2>
           <div class="legend-strip">
             <span class="legend-item">
               <span class="legend-dot legend-dot--susceptible"></span>
-              Susceptible
+              Clueless
             </span>
             <span class="legend-item">
               <span class="legend-dot legend-dot--infected"></span>
-              Infected
+              Gossiping
             </span>
             <span class="legend-item">
               <span class="legend-dot legend-dot--recovered"></span>
-              Recovered
+              Over It
             </span>
           </div>
           <div id="network-canvas"></div>
         </div>
 
         <div id="chart-container" class="panel">
-          <h2>Spread Curve</h2>
+          <h2>The Drama Tracker</h2>
           <div id="stats-bar">
             <div class="stat-item stat-item--susceptible">
-              <span class="stat-label">Susceptible</span>
+              <span class="stat-label">Clueless</span>
               <span class="stat-value" id="stat-s">0</span>
             </div>
             <div class="stat-item stat-item--infected">
-              <span class="stat-label">Infected</span>
+              <span class="stat-label">Gossiping</span>
               <span class="stat-value" id="stat-i">0</span>
             </div>
             <div class="stat-item stat-item--recovered">
-              <span class="stat-label">Recovered</span>
+              <span class="stat-label">Over It</span>
               <span class="stat-value" id="stat-r">0</span>
             </div>
           </div>
@@ -96,45 +97,46 @@
     <div id="info-modal" class="modal hidden">
       <div class="modal-content">
         <span id="close-modal" class="close-btn">&times;</span>
-        <h2>How to use the Simulator</h2>
+        <h2>How to start drama</h2>
 
         <ul>
           <li>
             <strong class="legend-text legend-text--susceptible"
-              >Gray (Susceptible):</strong
+              >Gray (Clueless):</strong
             >
-            Hasn't heard the rumor yet.
+            Have no idea what happened.
           </li>
           <li>
             <strong class="legend-text legend-text--infected"
-              >Red (Infected):</strong
+              >Red (Gossiping):</strong
             >
-            Actively spreading the rumor.
+            Actively spreading it to their friends.
           </li>
           <li>
             <strong class="legend-text legend-text--recovered"
-              >Blue (Recovered):</strong
+              >Blue (Over It):</strong
             >
-            Bored of the rumor and stopped spreading it.
+            They got bored and moved on.
           </li>
         </ul>
 
-        <h3>The Math Models</h3>
+        <h3>The Rules of Gossip</h3>
         <p>
-          <strong>Spread Rate (β):</strong> The probability a spreader tells a
-          susceptible friend on each tick.
+          <strong>Juiciness (Spread Rate):</strong> How likely someone is to
+          tell a clueless friend about the rumor.
         </p>
         <p>
-          <strong>Forget Rate (γ):</strong> The probability a spreader gets
-          bored and stops spreading.
+          <strong>Attention Span (Forget Rate):</strong> How quickly they get
+          bored of the drama and stop talking about it.
         </p>
         <p>
-          <strong>SIR Model:</strong> People turn Blue and never spread it
-          again.
+          <strong>Moved On (SIR Model):</strong> Once they get bored, they are
+          totally over it. They never spread it again.
         </p>
         <p>
-          <strong>SIS Model:</strong> People forget and turn Gray, ready to hear
-          it again.
+          <strong>Goldfish Memory (SIS Model):</strong> They forget the rumor,
+          but they are ready to be completely shocked by the exact same thing
+          again!
         </p>
       </div>
     </div>

@@ -8,15 +8,15 @@ const rootStyles = getComputedStyle(document.documentElement);
 const STATES = {
   S: {
     color: rootStyles.getPropertyValue("--color-susceptible").trim(),
-    name: "Susceptible",
+    name: "Clueless",
   },
   I: {
     color: rootStyles.getPropertyValue("--color-infected").trim(),
-    name: "Infectious",
+    name: "Gossiping",
   },
   R: {
     color: rootStyles.getPropertyValue("--color-recovered").trim(),
-    name: "Recovered",
+    name: "Over It",
   },
 };
 
@@ -71,7 +71,7 @@ const options = {
     enabled: true,
     initiallyActive: true,
     addNode: function (nodeData, callback) {
-      nodeData.label = "Person";
+      nodeData.label = "Friend";
       nodeData.state = "S";
       nodeData.color = STATES.S.color;
       callback(nodeData);
@@ -110,7 +110,7 @@ let TICK_RATE = 500;
 let lastGraphType = "random";
 
 nodeSlider.addEventListener("input", (e) => {
-  nodeLabel.innerText = `Total People: ${e.target.value}`;
+  nodeLabel.innerText = `Total Friends: ${e.target.value}`;
 });
 
 nodeSlider.addEventListener("change", (e) => {
@@ -156,7 +156,7 @@ function generateRandomGraph(numNodes) {
   for (let i = 1; i <= numNodes; i++) {
     newNodes.push({
       id: i,
-      label: `Person ${i}`,
+      label: `Friend ${i}`,
       state: "S",
       color: STATES.S.color,
     });
@@ -196,7 +196,7 @@ function generateHubGraph(numNodes) {
   for (let i = 1; i <= numNodes; i++) {
     newNodes.push({
       id: i,
-      label: `Person ${i}`,
+      label: `Friend ${i}`,
       state: "S",
       color: STATES.S.color,
     });
@@ -359,7 +359,7 @@ function startSimulation() {
   simulationInterval = setInterval(simulationTick, TICK_RATE);
   btnPlayPause.textContent = "⏸ Pause";
   btnPlayPause.classList.add("is-playing");
-  console.log("Simulation Started.");
+  console.log("Simulation Started. Drama incoming!");
 }
 
 function pauseSimulation() {
@@ -369,7 +369,7 @@ function pauseSimulation() {
   clearInterval(simulationInterval);
   btnPlayPause.textContent = "▶ Play";
   btnPlayPause.classList.remove("is-playing");
-  console.log("Simulation Paused.");
+  console.log("Simulation Paused. Shhhh.");
 }
 
 btnPlayPause.addEventListener("click", () => {
@@ -402,26 +402,26 @@ btnReset.addEventListener("click", () => {
   });
 
   nodes.update(resetNodes);
-  console.log("Simulation Reset. Everyone is susceptible again.");
+  console.log("Simulation Reset. Everyone is clueless again.");
   resetSimulationState();
 });
 
 spreadSlider.addEventListener("input", (e) => {
-  spreadLabel.innerText = `Spread Rate (β): ${e.target.value}%`;
+  spreadLabel.innerText = `Juiciness (Spread Rate): ${e.target.value}%`;
 });
-spreadLabel.innerText = `Spread Rate (β): ${spreadSlider.value}%`;
+spreadLabel.innerText = `Juiciness (Spread Rate): ${spreadSlider.value}%`;
 
 forgetSlider.addEventListener("input", (e) => {
-  forgetLabel.innerText = `Forget Rate (γ): ${e.target.value}%`;
+  forgetLabel.innerText = `Attention Span (Forget Rate): ${e.target.value}%`;
 });
-forgetLabel.innerText = `Forget Rate (γ): ${forgetSlider.value}%`;
+forgetLabel.innerText = `Attention Span (Forget Rate): ${forgetSlider.value}%`;
 
 speedSlider.addEventListener("input", (e) => {
   const speedValue = parseInt(e.target.value);
 
   TICK_RATE = 1100 - speedValue * 100;
 
-  speedLabel.innerText = `Simulation Speed: ${speedValue}x`;
+  speedLabel.innerText = `Gossip Speed: ${speedValue}x`;
 
   if (isPlaying) {
     clearInterval(simulationInterval);

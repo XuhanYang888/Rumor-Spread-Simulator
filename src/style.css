@@ -32,6 +32,18 @@ body {
   flex-direction: column;
   gap: 20px;
   border-right: 1px solid #444;
+  overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: #2b2b36;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
 }
 
 .subtitle {
@@ -70,6 +82,10 @@ button {
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 button:hover {
